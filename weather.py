@@ -1,4 +1,9 @@
 import requests, time, json
+from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
+import numpy as np
 
 
 
@@ -11,10 +16,27 @@ units = "imperial"
 
 # response = requests.get("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=5min&apikey=demo")
 
-while True:
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
+xs = []
+ys = []
+
+def animate(i, xs, ys):
     response = requests.get(f"{url}q={q}&units={units}&appid={apikey}")
     obj = response.json()
     temp = obj["main"]["temp"]
     text = json.dumps(obj, sort_keys=True, indent=4)
-    print(f"Current temperature in Chicago: {temp}")
-    time.sleep(5)
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print(f"Current temperature in Chicago at {current_time}: {temp}")
+    xs.append(current_time)
+    ys.append(temp)
+    xs = xs[-20:]
+    ys = ys[-20:]
+    ax.clear()
+    ax.scatter(xs, ys)
+    # plt.draw()
+    # time.sleep(2)
+
+ani = animation.FuncAnimation(fig, animate, fargs=(xs, ys), interval=300000)
+plt.show()
